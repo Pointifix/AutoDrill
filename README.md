@@ -1,6 +1,6 @@
 # Auto Drill
 
-[![GitHub all releases](https://img.shields.io/github/downloads/Pointifix/AutoDrill/total)](https://github.com/Pointifix/AutoDrill)
+[![GitHub all releases](https://img.shields.io/github/downloads/Pointifix/AutoDrill/total)](https://github.com/Pointifix/AutoDrill/releases)
 
 Mindustry Mod which adds tools to automatically fill a resource patch with drills.
 
