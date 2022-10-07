@@ -33,7 +33,6 @@ desktop-sdl/build/
 ios/robovm.properties
 packr-out/
 config/
-*.gif
 run.bat
 
 version.properties
