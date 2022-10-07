@@ -47,7 +47,7 @@ public class BridgeDrill {
             });
 
             if (!neighbors.isEmpty()) {
-                bridgeTiles.add(neighbors);
+                bridgeTiles.addAll(neighbors);
                 return true;
             }
 

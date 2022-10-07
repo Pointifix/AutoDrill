@@ -64,8 +64,8 @@ public class OptimizationDrill {
                 if ((rects.isEmpty() || rects.find(r -> r.overlaps(rect)) == null) && Build.validPlace(drill, Vars.player.team(), tile.x, tile.y, 0)) {
                     int newSum = sum + tilesItemAndCount.get(tile).value;
 
-                    Seq<Tile> newSelection = selection.copy().add(tile);
-                    Seq<Rect> newRects = rects.copy().add(rect);
+                    Seq<Tile> newSelection = selection.copy().addAll(tile);
+                    Seq<Rect> newRects = rects.copy().addAll(rect);
 
                     tries[0]++;
                     int newMax = recursiveMaxSearch(tiles, drill, tilesItemAndCount, newSelection, newRects, newSum, tries, maxTries);

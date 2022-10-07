@@ -99,7 +99,7 @@ public class Util {
             }
         }
 
-        tiles.add(expandedTiles);
+        tiles.addAll(expandedTiles);
     }
 
     protected static Seq<Tile> getConnectedTiles(Tile tile) {

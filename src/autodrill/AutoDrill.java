@@ -2,7 +2,6 @@ package autodrill;
 
 import arc.Core;
 import arc.Events;
-import arc.func.Cons;
 import arc.input.InputProcessor;
 import arc.input.KeyCode;
 import arc.math.geom.Vec2;
@@ -22,11 +21,8 @@ import mindustry.game.EventType;
 import mindustry.gen.Icon;
 import mindustry.mod.Mod;
 import mindustry.ui.Styles;
-import mindustry.ui.dialogs.SettingsMenuDialog;
 import mindustry.world.Tile;
 import mindustry.world.blocks.production.Drill;
-
-import java.util.Arrays;
 
 import static arc.Core.bundle;
 import static mindustry.Vars.ui;
@@ -51,7 +47,7 @@ public class AutoDrill extends Mod {
         buildDirectionTable();
 
         // Settings
-        Cons<SettingsMenuDialog.SettingsTable> builder = settingsTable -> {
+        /*Cons<SettingsMenuDialog.SettingsTable> builder = settingsTable -> {
             SettingsMenuDialog.SettingsTable settings = new SettingsMenuDialog.SettingsTable();
             settings.textPref(bundle.get("auto-drill.settings.activation-key"), KeyCode.h.name().toUpperCase(), s -> {
                 KeyCode keyCode = Arrays.stream(KeyCode.values()).filter(k -> k.value.equalsIgnoreCase(s)).findFirst().orElse(null);
@@ -67,12 +63,13 @@ public class AutoDrill extends Mod {
             settingsTable.add(settings);
         };
         ui.settings.getCategories().add(new SettingsMenuDialog.SettingsCategory(bundle.get("auto-drill.settings.title"), new TextureRegionDrawable(Core.atlas.find("auto-drill-logo")), builder));
+        */
 
         // Activation
         Core.scene.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, KeyCode keyCode) {
-                if (Core.settings.getString(bundle.get("auto-drill.settings.activation-key")).equalsIgnoreCase(keyCode.value)) {
+                if (keyCode.equals(KeyCode.h)) {
                     enabled = !enabled;
                     selectTable.visible = false;
                     directionTable.visible = false;
@@ -100,7 +97,7 @@ public class AutoDrill extends Mod {
         });
 
         ui.hudGroup.fill(t -> {
-            enableButton = t.button(new TextureRegionDrawable(Core.atlas.find("auto-drill-logo")), Styles.emptyTogglei, () -> {
+            enableButton = t.button(new TextureRegionDrawable(Core.atlas.find("auto-drill-logo")), Styles.emptytogglei, () -> {
                 enabled = !enabled;
                 selectTable.visible = false;
                 directionTable.visible = false;
