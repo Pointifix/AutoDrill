@@ -66,7 +66,7 @@ public class AutoDrill extends Mod {
 
             settingsTable.add(settings);
         };
-        ui.settings.getCategories().add(new SettingsMenuDialog.SettingsCategory(bundle.get("auto-drill.settings.title"), Icon.production, builder));
+        ui.settings.getCategories().add(new SettingsMenuDialog.SettingsCategory(bundle.get("auto-drill.settings.title"), new TextureRegionDrawable(Core.atlas.find("auto-drill-logo")), builder));
 
         // Activation
         Core.scene.addListener(new InputListener() {
@@ -100,7 +100,7 @@ public class AutoDrill extends Mod {
         });
 
         ui.hudGroup.fill(t -> {
-            enableButton = t.button(new TextureRegionDrawable(Core.atlas.find("block-mechanical-drill-full")), Styles.emptyTogglei, () -> {
+            enableButton = t.button(new TextureRegionDrawable(Core.atlas.find("auto-drill-logo")), Styles.emptyTogglei, () -> {
                 enabled = !enabled;
                 selectTable.visible = false;
                 directionTable.visible = false;
