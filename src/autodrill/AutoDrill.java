@@ -72,16 +72,15 @@ public class AutoDrill extends Mod {
             t.labelWrap(bundle.get("auto-drill-welcome-text")).growX().fillX().padTop(10).row();
             t.labelWrap(bundle.get("auto-drill-tutorial-text")).growX().fillX().padTop(10).row();
 
-            float maxWidth = Core.scene.getWidth() * (Core.app.isDesktop() ? 0.5f : 1);
+            float maxWidth = Math.max(Core.scene.getWidth() * 0.5f, Math.min(1000, Core.scene.getWidth()));
 
-            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial"))).maxWidth(maxWidth - 10).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
+            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial"))).maxWidth(maxWidth).scaling(Scaling.fit).padTop(10).get().setWidth(maxWidth);
             t.row();
-
             t.labelWrap(bundle.get("auto-drill-tutorial2-text")).growX().fillX().padTop(10).row();
-            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial2"))).maxWidth(maxWidth - 10).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
+            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial2"))).maxWidth(maxWidth).scaling(Scaling.fit).padTop(10).get().setWidth(maxWidth);
             t.row();
             t.labelWrap(bundle.get("auto-drill-settings-text")).growX().fillX().padTop(10).row();
-            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-settings"))).maxWidth(maxWidth - 10).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
+            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-settings"))).maxWidth(maxWidth).scaling(Scaling.fit).padTop(10).get().setWidth(maxWidth);
             t.row();
             t.labelWrap(bundle.get("auto-drill-conclusion-text")).growX().fillX().padTop(10).row();
 
