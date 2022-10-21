@@ -72,19 +72,21 @@ public class AutoDrill extends Mod {
             t.labelWrap(bundle.get("auto-drill-welcome-text")).growX().fillX().padTop(10).row();
             t.labelWrap(bundle.get("auto-drill-tutorial-text")).growX().fillX().padTop(10).row();
 
-            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial"))).maxHeight(350).maxWidth(Math.max(Core.scene.getWidth() * 0.5f, Math.min(500, Core.scene.getWidth())) - 25).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
+            float maxWidth = Core.scene.getWidth() * (Core.app.isDesktop() ? 0.5f : 1);
+
+            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial"))).maxWidth(maxWidth - 10).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
             t.row();
 
             t.labelWrap(bundle.get("auto-drill-tutorial2-text")).growX().fillX().padTop(10).row();
-            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial2"))).maxHeight(350).maxWidth(Math.max(Core.scene.getWidth() * 0.5f, Math.min(500, Core.scene.getWidth())) - 25).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
+            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-tutorial2"))).maxWidth(maxWidth - 10).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
             t.row();
             t.labelWrap(bundle.get("auto-drill-settings-text")).growX().fillX().padTop(10).row();
-            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-settings"))).maxHeight(350).maxWidth(Math.max(Core.scene.getWidth() * 0.5f, Math.min(500, Core.scene.getWidth())) - 25).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
+            t.image(new TextureRegionDrawable(Core.atlas.find("auto-drill-settings"))).maxWidth(maxWidth - 10).scaling(Scaling.fit).padTop(10).get().setAlign(Align.left);
             t.row();
             t.labelWrap(bundle.get("auto-drill-conclusion-text")).growX().fillX().padTop(10).row();
 
             ScrollPane p = new ScrollPane(t);
-            baseDialog.cont.top().add(p).growX().pad(0, 10, 0, 10).maxWidth(Math.max(Core.scene.getWidth() * 0.5f, Math.min(500, Core.scene.getWidth())));
+            baseDialog.cont.top().add(p).growX().pad(0, 10, 0, 10).maxWidth(maxWidth);
 
             baseDialog.addCloseButton();
             baseDialog.show();
