@@ -8,12 +8,12 @@ import arc.struct.Queue;
 import arc.struct.Seq;
 import mindustry.Vars;
 import mindustry.content.Blocks;
+import mindustry.gen.Call;
 import mindustry.type.Item;
 import mindustry.world.Block;
 import mindustry.world.Build;
 import mindustry.world.Edges;
 import mindustry.world.Tile;
-import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.production.Drill;
 
 import static arc.Core.bundle;
@@ -109,17 +109,17 @@ public class Util {
 
         queue.addLast(tile);
 
-        Floor floor = tile.overlay() != Blocks.air ? tile.overlay() : tile.floor();
+        Item sourceItem = tile.drop();
 
         int maxTiles = Core.settings.getInt(bundle.get("auto-drill.settings.max-tiles"));
 
         while (!queue.isEmpty() && tiles.size < maxTiles) {
             Tile currentTile = queue.removeFirst();
 
-            if (!Build.validPlace(Blocks.router, Vars.player.team(), currentTile.x, currentTile.y, 0) || visited.contains(currentTile))
+            if (!Build.validPlace(Blocks.copperWall.environmentBuildable() ? Blocks.copperWall : Blocks.berylliumWall, Vars.player.team(), currentTile.x, currentTile.y, 0) || visited.contains(currentTile))
                 continue;
 
-            if (currentTile.floor().itemDrop == floor.itemDrop || currentTile.overlay().itemDrop == floor.itemDrop) {
+            if (currentTile.drop() == sourceItem) {
                 for (int x = -1; x <= 1; x++) {
                     for (int y = -1; y <= 1; y++) {
                         if (!(x == 0 && y == 0)) {
@@ -138,11 +138,17 @@ public class Util {
             visited.add(currentTile);
         }
 
+        tiles.sort(Tile::pos);
+
         return tiles;
     }
 
     protected static Rect getBlockRect(Tile tile, Block block) {
         int offset = (block.size - 1) / 2;
         return new Rect(tile.x - offset, tile.y - offset, block.size, block.size);
+    }
+
+    protected static Point2 tileToPoint2(Tile tile) {
+        return new Point2(tile.x, tile.y);
     }
 }

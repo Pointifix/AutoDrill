@@ -22,7 +22,7 @@ public class BridgeDrill {
     }
 
     private static void placeDrillsAndBridges(Tile source, Seq<Tile> tiles, Drill drill, Direction direction) {
-        Point2 directionConfig = getDirectionConfig(direction);
+        Point2 directionConfig = new Point2(direction.p.x * 3, direction.p.y * 3);
 
         Seq<Tile> drillTiles = tiles.copy().filter(BridgeDrill::isDrillTile);
         Seq<Tile> bridgeTiles = tiles.copy().filter(BridgeDrill::isBridgeTile);
@@ -54,8 +54,7 @@ public class BridgeDrill {
             return false;
         });
 
-        Point2 directionVector = getDirectionVector(direction);
-        Tile outerMost = bridgeTiles.max((t) -> directionVector.x == 0 ? t.y * directionVector.y : t.x * directionVector.x);
+        Tile outerMost = bridgeTiles.max((t) -> direction.p.x == 0 ? t.y * direction.p.y : t.x * direction.p.x);
         if (outerMost == null) return;
 
         Tile outlet = outerMost.nearby(directionConfig);
@@ -110,23 +109,5 @@ public class BridgeDrill {
         short y = tile.y;
 
         return x % 3 == 0 && y % 3 == 0;
-    }
-
-    private static Point2 getDirectionConfig(Direction direction) {
-        return switch (direction) {
-            case RIGHT -> new Point2(3, 0);
-            case DOWN -> new Point2(0, -3);
-            case LEFT -> new Point2(-3, 0);
-            case UP -> new Point2(0, 3);
-        };
-    }
-
-    private static Point2 getDirectionVector(Direction direction) {
-        return switch (direction) {
-            case RIGHT -> new Point2(1, 0);
-            case DOWN -> new Point2(0, -1);
-            case LEFT -> new Point2(-1, 0);
-            case UP -> new Point2(0, 1);
-        };
     }
 }
