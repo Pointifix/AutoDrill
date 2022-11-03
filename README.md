@@ -15,7 +15,7 @@ The laser and airblast drill buttons fill the resource patch with drills and pla
 
 ![](showcase/optimization-drill.gif)
 
-For Erekir the mod is able to automatically fill wall resources
+For Erekir the mod enables you to automatically fill wall resources
 
 ![](showcase/wall-drill.gif)
 
