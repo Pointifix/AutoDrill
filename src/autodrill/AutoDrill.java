@@ -58,11 +58,8 @@ public class AutoDrill extends Mod {
 
     @Override
     public void init() {
-        for (Mods.LoadedMod loadedMod : Vars.mods.list()) {
-            Log.info(loadedMod.name);
-        }
-
-        if (Core.settings.getBool("auto-drill") && false) {
+        // Tutorial
+        if (Core.settings.getBool("auto-drill")) {
             Core.settings.put("auto-drill", true);
         } else {
             BaseDialog baseDialog = new BaseDialog(bundle.get("auto-drill-welcome-title"));
@@ -103,6 +100,7 @@ public class AutoDrill extends Mod {
             });
             settings.checkPref(bundle.get("auto-drill.settings.display-toggle-button"), true);
             settings.sliderPref(bundle.get("auto-drill.settings.max-tiles"), 100, 25, 500, 50, i -> i + "");
+            settings.sliderPref(bundle.get("auto-drill.settings.bridge-drill-min-ores"), 1, 1, 4, 1, i -> i + "");
             settings.sliderPref(bundle.get("auto-drill.settings.optimization-min-ores-laser-drill"), 5, 1, 9, 1, i -> i + "");
             settings.sliderPref(bundle.get("auto-drill.settings.optimization-min-ores-airblast-drill"), 9, 1, 16, 1, i -> i + "");
             settings.sliderPref(bundle.get("auto-drill.settings.optimization-quality"), 2, 1, 10, 1, i -> i + "");
@@ -160,7 +158,12 @@ public class AutoDrill extends Mod {
 
     private void buildSelectTable() {
         selectTable.update(() -> {
-            if (Vars.state.isMenu()) selectTable.visible = false;
+            if (Vars.state.isMenu()) {
+                selectTable.visible = false;
+                return;
+            }
+            Vec2 v = Core.camera.project(selectedTile.centerX() * Vars.tilesize, (selectedTile.centerY() + 1) * Vars.tilesize);
+            selectTable.setPosition(v.x, v.y, Align.bottom);
         });
 
         mechanicalDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-mechanical-drill-full")), Styles.defaulti, () -> {
@@ -196,12 +199,12 @@ public class AutoDrill extends Mod {
         }).get();
         plasmaBoreButton.resizeImage(buttonSize);
 
-        largePlasmaBoreButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-large-plasma-bore-full")), Styles.defaulti, () -> {
+        /*largePlasmaBoreButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-large-plasma-bore-full")), Styles.defaulti, () -> {
             selectTable.visible = false;
             directionTable.visible = true;
             directionAction = direction -> WallDrill.fill(selectedTile, (BeamDrill) Blocks.largePlasmaBore, direction);
         }).get();
-        largePlasmaBoreButton.resizeImage(buttonSize);
+        largePlasmaBoreButton.resizeImage(buttonSize);*/
 
         impactDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-impact-drill-full")), Styles.defaulti, () -> {
             selectTable.visible = false;
@@ -251,14 +254,14 @@ public class AutoDrill extends Mod {
         }
 
         selectTable.removeChild(plasmaBoreButton);
-        if (Blocks.plasmaBore.environmentBuildable() && selectedTile.wallDrop() != null) {
+        if (Blocks.plasmaBore.environmentBuildable() && selectedTile.wallDrop() != null && selectedTile.wallDrop().hardness <= ((BeamDrill)Blocks.plasmaBore).tier) {
             selectTable.add(plasmaBoreButton);
         }
 
-        selectTable.removeChild(largePlasmaBoreButton);
-        if (Blocks.largePlasmaBore.environmentBuildable() && selectedTile.wallDrop() != null) {
+        /*selectTable.removeChild(largePlasmaBoreButton);
+        if (Blocks.largePlasmaBore.environmentBuildable() && selectedTile.wallDrop() != null && selectedTile.wallDrop().hardness <= ((BeamDrill)Blocks.largePlasmaBore).tier) {
             selectTable.add(largePlasmaBoreButton);
-        }
+        }*/
 
         selectTable.removeChild(impactDrillButton);
         if (Blocks.impactDrill.environmentBuildable() && ((Drill) Blocks.impactDrill).canMine(selectedTile)) {
@@ -273,7 +276,12 @@ public class AutoDrill extends Mod {
 
     private void buildDirectionTable() {
         directionTable.update(() -> {
-            if (Vars.state.isMenu()) directionTable.visible = false;
+            if (Vars.state.isMenu()) {
+                directionTable.visible = false;
+                return;
+            }
+            Vec2 v = Core.camera.project(selectedTile.centerX() * Vars.tilesize, (selectedTile.centerY() + 1) * Vars.tilesize);
+            directionTable.setPosition(v.x, v.y, Align.bottom);
         });
 
         directionTable.table().get().button(Icon.up, Styles.defaulti, () -> {

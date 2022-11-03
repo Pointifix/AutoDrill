@@ -91,8 +91,9 @@ public class Util {
                     if (dx == 0 && dy == 0) continue;
 
                     Tile nearby = tile.nearby(dx, dy);
+                    if (nearby == null) continue;
 
-                    if (nearby != null && !tiles.contains(nearby) && !expandedTiles.contains(nearby)) {
+                    if (!tiles.contains(nearby) && !expandedTiles.contains(nearby)) {
                         expandedTiles.add(nearby);
                     }
                 }
@@ -124,6 +125,7 @@ public class Util {
                     for (int y = -1; y <= 1; y++) {
                         if (!(x == 0 && y == 0)) {
                             Tile neighbor = currentTile.nearby(x, y);
+                            if (neighbor == null) continue;
 
                             if (!visited.contains(neighbor)) {
                                 queue.addLast(neighbor);

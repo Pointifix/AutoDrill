@@ -15,6 +15,10 @@ The laser and airblast drill buttons fill the resource patch with drills and pla
 
 ![](showcase/optimization-drill.gif)
 
+For Erekir the mod is able to automatically fill wall resources
+
+![](showcase/wall-drill.gif)
+
 The mod has several configuration options.
 
 - **Activation Key** 
@@ -28,8 +32,8 @@ The mod has several configuration options.
 - **Max Tiles** 
   
   The maximum number of tiles that are flood filled and later filled with drills, highly effects performance
-  
-- **Minimum Ores per Laser/Airblast Drill** 
+
+- **Minimum Ores per Mechanical/Pneumatic/Laser/Airblast Drill** 
   
   The minimum amount of resource tiles any drill must cover
 
@@ -41,4 +45,4 @@ The mod has several configuration options.
   
   Whether to place water extractors and power nodes next to the drills
 
-![](showcase/settings.jpg)
+![](showcase/settings.png)

@@ -23,4 +23,21 @@ public enum Direction {
     public int secondaryAxis(Point2 p) {
         return p.x * this.p.y + p.y * this.p.x;
     }
+
+    public static Direction getOpposite(Direction direction) {
+        switch (direction) {
+            case RIGHT -> {
+                return LEFT;
+            }
+            case UP -> {
+                return DOWN;
+            }
+            case LEFT -> {
+                return RIGHT;
+            }
+            default -> {
+                return UP;
+            }
+        }
+    }
 }

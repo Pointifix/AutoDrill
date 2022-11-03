@@ -1,5 +1,6 @@
 package autodrill.filler;
 
+import arc.Core;
 import arc.math.geom.Point2;
 import arc.struct.ObjectIntMap;
 import arc.struct.Seq;
@@ -11,6 +12,8 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.production.Drill;
 
 import java.util.InputMismatchException;
+
+import static arc.Core.bundle;
 
 public class BridgeDrill {
     public static void fill(Tile tile, Drill drill, Direction direction) {
@@ -27,10 +30,12 @@ public class BridgeDrill {
         Seq<Tile> drillTiles = tiles.copy().filter(BridgeDrill::isDrillTile);
         Seq<Tile> bridgeTiles = tiles.copy().filter(BridgeDrill::isBridgeTile);
 
+        int minOreTiles = Core.settings.getInt(bundle.get("auto-drill.settings.bridge-drill-min-ores"));
+
         drillTiles.filter(t -> {
             ObjectIntMap.Entry<Item> itemAndCount = Util.countOre(t, drill);
 
-            if (itemAndCount == null || itemAndCount.key != source.drop()) {
+            if (itemAndCount == null || itemAndCount.key != source.drop() || itemAndCount.value < minOreTiles) {
                 return false;
             }
 
