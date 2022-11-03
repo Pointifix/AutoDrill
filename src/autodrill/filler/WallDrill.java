@@ -69,7 +69,7 @@ public class WallDrill {
         }
         if (ductTiles.isEmpty()) return;
 
-        Tile outerMostDuctTile = ductTiles.copy().filter(t -> boreTiles.find(bt -> direction.secondaryAxis(new Point2(bt.x, bt.y)) == direction.secondaryAxis(new Point2(t.x, t.y))) == null).max(Comparator.comparingInt(t -> -direction.primaryAxis(new Point2(t.x, t.y))));
+        Tile outerMostDuctTile = ductTiles.copy().filter(t -> boreTiles.find(bt -> direction.secondaryAxis(new Point2(bt.x, bt.y)) == direction.secondaryAxis(new Point2(t.x, t.y))) == null).max(t -> -direction.primaryAxis(new Point2(t.x, t.y)));
         if (outerMostDuctTile == null) return;
         ductTiles.sort(t -> t.dst2(outerMostDuctTile));
         Seq<Tile> connectingTiles = new Seq<>();
@@ -143,7 +143,7 @@ public class WallDrill {
             Vars.player.unit().addBuild(buildPlan);
         }
 
-        Tile outerMost = boreTiles.max(Comparator.comparingInt(t -> -direction.primaryAxis(new Point2(t.x, t.y))));
+        Tile outerMost = boreTiles.max(t -> -direction.primaryAxis(new Point2(t.x, t.y)));
         for (Tile boreTile : boreTiles) {
             Tile beamNodeTile = Vars.world.tile(
                     Math.abs(direction.p.x) * outerMost.x + Math.abs(direction.p.y) * boreTile.x - offsetOpposite.x + directionOpposite.p.x * 2,
