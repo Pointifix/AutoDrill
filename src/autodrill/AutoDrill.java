@@ -59,9 +59,7 @@ public class AutoDrill extends Mod {
     @Override
     public void init() {
         // Tutorial
-        if (Core.settings.getBool("auto-drill")) {
-            Core.settings.put("auto-drill", true);
-        } else {
+        if (!Core.settings.getBool("auto-drill")) {
             BaseDialog baseDialog = new BaseDialog(bundle.get("auto-drill-welcome-title"));
 
             Table t = new Table();
@@ -86,6 +84,8 @@ public class AutoDrill extends Mod {
 
             baseDialog.addCloseButton();
             baseDialog.show();
+
+            Core.settings.put("auto-drill", true);
         }
 
         buildSelectTable();
