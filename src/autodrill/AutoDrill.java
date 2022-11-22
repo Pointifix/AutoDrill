@@ -122,8 +122,7 @@ public class AutoDrill extends Mod {
                         !ui.schematics.isShown() &&
                         !ui.database.isShown() &&
                         !ui.consolefrag.shown() &&
-                        !ui.content.isShown() &&
-                        !ui.men) {
+                        !ui.content.isShown()) {
                     if (Core.settings.getString(bundle.get("auto-drill.settings.activation-key")).equalsIgnoreCase(keyCode.value)) {
                         enabled = !enabled;
                         selectTable.visible = false;
