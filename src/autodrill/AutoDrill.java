@@ -26,12 +26,14 @@ import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.game.EventType;
+import mindustry.gen.Call;
 import mindustry.gen.Icon;
 import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 import mindustry.ui.Styles;
 import mindustry.ui.dialogs.BaseDialog;
 import mindustry.ui.dialogs.SettingsMenuDialog;
+import mindustry.ui.fragments.ChatFragment;
 import mindustry.world.Tile;
 import mindustry.world.blocks.production.BeamDrill;
 import mindustry.world.blocks.production.Drill;
@@ -39,6 +41,7 @@ import mindustry.world.blocks.production.Drill;
 import java.util.Arrays;
 
 import static arc.Core.bundle;
+import static mindustry.Vars.state;
 import static mindustry.Vars.ui;
 
 public class AutoDrill extends Mod {
@@ -114,11 +117,19 @@ public class AutoDrill extends Mod {
         Core.scene.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, KeyCode keyCode) {
-                if (Core.settings.getString(bundle.get("auto-drill.settings.activation-key")).equalsIgnoreCase(keyCode.value)) {
-                    enabled = !enabled;
-                    selectTable.visible = false;
-                    directionTable.visible = false;
-                    enableButton.setChecked(enabled);
+                if (!state.isMenu() &&
+                        !ui.chatfrag.shown() &&
+                        !ui.schematics.isShown() &&
+                        !ui.database.isShown() &&
+                        !ui.consolefrag.shown() &&
+                        !ui.content.isShown() &&
+                        !ui.men) {
+                    if (Core.settings.getString(bundle.get("auto-drill.settings.activation-key")).equalsIgnoreCase(keyCode.value)) {
+                        enabled = !enabled;
+                        selectTable.visible = false;
+                        directionTable.visible = false;
+                        enableButton.setChecked(enabled);
+                    }
                 }
 
                 return super.keyDown(event, keyCode);
