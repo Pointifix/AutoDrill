@@ -23,10 +23,12 @@ public class OptimizationDrill {
     }
 
     public static void fill(Tile tile, Drill drill, boolean waterExtractorsAndPowerNodes) {
-        Seq<Tile> tiles = Util.getConnectedTiles(tile);
+        int maxTiles = Core.settings.getInt((drill == Blocks.mechanicalDrill ? "laser" : "airblast") + "-drill-max-tiles");
+
+        Seq<Tile> tiles = Util.getConnectedTiles(tile, maxTiles);
         Util.expandArea(tiles, drill.size / 2);
 
-        int minOresPerDrill = drill == Blocks.laserDrill ? Core.settings.getInt(bundle.get("auto-drill.settings.optimization-min-ores-laser-drill")) : Core.settings.getInt(bundle.get("auto-drill.settings.optimization-min-ores-airblast-drill"));
+        int minOresPerDrill = Core.settings.getInt((drill == Blocks.blastDrill ? "airblast" : (drill == Blocks.laserDrill ? "laser" : (drill == Blocks.pneumaticDrill ? "pneumatic" : "mechanical"))) + "-drill-min-ores");
 
         Floor floor = tile.overlay() != Blocks.air ? tile.overlay() : tile.floor();
 

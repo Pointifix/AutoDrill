@@ -103,7 +103,7 @@ public class Util {
         tiles.add(expandedTiles);
     }
 
-    protected static Seq<Tile> getConnectedTiles(Tile tile) {
+    protected static Seq<Tile> getConnectedTiles(Tile tile, int maxTiles) {
         Queue<Tile> queue = new Queue<>();
         Seq<Tile> tiles = new Seq<>();
         Seq<Tile> visited = new Seq<>();
@@ -111,8 +111,6 @@ public class Util {
         queue.addLast(tile);
 
         Item sourceItem = tile.drop();
-
-        int maxTiles = Core.settings.getInt(bundle.get("auto-drill.settings.max-tiles"));
 
         while (!queue.isEmpty() && tiles.size < maxTiles) {
             Tile currentTile = queue.removeFirst();

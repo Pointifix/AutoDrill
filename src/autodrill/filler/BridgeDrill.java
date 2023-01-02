@@ -19,7 +19,9 @@ public class BridgeDrill {
     public static void fill(Tile tile, Drill drill, Direction direction) {
         if (drill.size != 2) throw new InputMismatchException("Drill must have a size of 2");
 
-        Seq<Tile> tiles = Util.getConnectedTiles(tile);
+        int maxTiles = Core.settings.getInt((drill == Blocks.mechanicalDrill ? "mechanical" : "pneumatic") + "-drill-max-tiles");
+
+        Seq<Tile> tiles = Util.getConnectedTiles(tile, maxTiles);
         Util.expandArea(tiles, drill.size / 2);
         placeDrillsAndBridges(tile, tiles, drill, direction);
     }
@@ -30,12 +32,12 @@ public class BridgeDrill {
         Seq<Tile> drillTiles = tiles.copy().filter(BridgeDrill::isDrillTile);
         Seq<Tile> bridgeTiles = tiles.copy().filter(BridgeDrill::isBridgeTile);
 
-        int minOreTiles = Core.settings.getInt(bundle.get("auto-drill.settings.bridge-drill-min-ores"));
+        int minOresPerDrill = Core.settings.getInt((drill == Blocks.blastDrill ? "airblast" : (drill == Blocks.laserDrill ? "laser" : (drill == Blocks.pneumaticDrill ? "pneumatic" : "mechanical"))) + "-drill-min-ores");
 
         drillTiles.filter(t -> {
             ObjectIntMap.Entry<Item> itemAndCount = Util.countOre(t, drill);
 
-            if (itemAndCount == null || itemAndCount.key != source.drop() || itemAndCount.value < minOreTiles) {
+            if (itemAndCount == null || itemAndCount.key != source.drop() || itemAndCount.value < minOresPerDrill) {
                 return false;
             }
 

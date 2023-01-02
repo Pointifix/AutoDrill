@@ -33,7 +33,7 @@ The mod has several configuration options.
   
   The maximum number of tiles that are flood filled and later filled with drills, highly effects performance
 
-- **Minimum Ores per Mechanical/Pneumatic/Laser/Airblast Drill** 
+- **Minimum Ores** 
   
   The minimum amount of resource tiles any drill must cover
 

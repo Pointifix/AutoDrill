@@ -6,17 +6,12 @@ import arc.func.Cons;
 import arc.input.InputProcessor;
 import arc.input.KeyCode;
 import arc.math.geom.Vec2;
-import arc.scene.Element;
 import arc.scene.event.InputEvent;
 import arc.scene.event.InputListener;
 import arc.scene.style.TextureRegionDrawable;
-import arc.scene.ui.Image;
-import arc.scene.ui.ImageButton;
-import arc.scene.ui.ScrollPane;
-import arc.scene.ui.layout.Cell;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.Table;
 import arc.util.Align;
-import arc.util.Log;
 import arc.util.Scaling;
 import autodrill.filler.BridgeDrill;
 import autodrill.filler.Direction;
@@ -26,14 +21,12 @@ import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.game.EventType;
-import mindustry.gen.Call;
 import mindustry.gen.Icon;
+import mindustry.graphics.Pal;
 import mindustry.mod.Mod;
-import mindustry.mod.Mods;
 import mindustry.ui.Styles;
 import mindustry.ui.dialogs.BaseDialog;
 import mindustry.ui.dialogs.SettingsMenuDialog;
-import mindustry.ui.fragments.ChatFragment;
 import mindustry.world.Tile;
 import mindustry.world.blocks.production.BeamDrill;
 import mindustry.world.blocks.production.Drill;
@@ -97,15 +90,35 @@ public class AutoDrill extends Mod {
         // Settings
         Cons<SettingsMenuDialog.SettingsTable> builder = settingsTable -> {
             SettingsMenuDialog.SettingsTable settings = new SettingsMenuDialog.SettingsTable();
+
+            settings.pref(new DescriptionSetting(bundle.get("auto-drill.settings.activation-desc")));
             settings.textPref(bundle.get("auto-drill.settings.activation-key"), KeyCode.h.name().toUpperCase(), s -> {
                 KeyCode keyCode = Arrays.stream(KeyCode.values()).filter(k -> k.value.equalsIgnoreCase(s)).findFirst().orElse(null);
                 Core.settings.put(bundle.get("auto-drill.settings.activation-key"), keyCode == null ? KeyCode.h.name().toUpperCase() : keyCode.name().toUpperCase());
             });
             settings.checkPref(bundle.get("auto-drill.settings.display-toggle-button"), true);
-            settings.sliderPref(bundle.get("auto-drill.settings.max-tiles"), 100, 25, 500, 50, i -> i + "");
-            settings.sliderPref(bundle.get("auto-drill.settings.bridge-drill-min-ores"), 1, 1, 4, 1, i -> i + "");
-            settings.sliderPref(bundle.get("auto-drill.settings.optimization-min-ores-laser-drill"), 5, 1, 9, 1, i -> i + "");
-            settings.sliderPref(bundle.get("auto-drill.settings.optimization-min-ores-airblast-drill"), 9, 1, 16, 1, i -> i + "");
+            settings.pref(new DividerSetting());
+
+            settings.pref(new DescriptionSetting(bundle.get("auto-drill.settings.drills-desc")));
+
+            settings.pref(new DescriptionSetting("\uF870 " + bundle.get("auto-drill.settings.mechanical-drill")));
+            settings.sliderPref("mechanical-drill-max-tiles", 200, 25, 500, 25, value -> value + "").title = bundle.get("auto-drill.settings.max-tiles");
+            settings.sliderPref("mechanical-drill-min-ores", 1, 1, 4, 1, value -> value + "").title = bundle.get("auto-drill.settings.min-ores");
+
+            settings.pref(new DescriptionSetting("\uF86F " + bundle.get("auto-drill.settings.pneumatic-drill")));
+            settings.sliderPref("pneumatic-drill-max-tiles", 150, 25, 500, 25, value -> value + "").title = bundle.get("auto-drill.settings.max-tiles");
+            settings.sliderPref("pneumatic-drill-min-ores", 2, 1, 4, 1, value -> value + "").title = bundle.get("auto-drill.settings.min-ores");
+
+            settings.pref(new DescriptionSetting("\uF86E " + bundle.get("auto-drill.settings.laser-drill")));
+            settings.sliderPref("laser-drill-max-tiles", 100, 25, 500, 25, value -> value + "").title = bundle.get("auto-drill.settings.max-tiles");
+            settings.sliderPref("laser-drill-min-ores", 5, 1, 9, 1, value -> value + "").title = bundle.get("auto-drill.settings.min-ores");
+
+            settings.pref(new DescriptionSetting("\uF86D " + bundle.get("auto-drill.settings.airblast-drill")));
+            settings.sliderPref("airblast-drill-max-tiles", 100, 25, 500, 25, value -> value + "").title = bundle.get("auto-drill.settings.max-tiles");
+            settings.sliderPref("airblast-drill-min-ores", 9, 1, 16, 1, value -> value + "").title = bundle.get("auto-drill.settings.min-ores");
+
+            settings.pref(new DividerSetting());
+            settings.pref(new DescriptionSetting(bundle.get("auto-drill.settings.optimization-quality-desc")));
             settings.sliderPref(bundle.get("auto-drill.settings.optimization-quality"), 2, 1, 10, 1, i -> i + "");
             settings.checkPref(bundle.get("auto-drill.settings.place-water-extractor-and-power-nodes"), true);
 
@@ -177,6 +190,7 @@ public class AutoDrill extends Mod {
         });
 
         mechanicalDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-mechanical-drill-full")), Styles.defaulti, () -> {
+            enabled = false;
             selectTable.visible = false;
             directionTable.visible = true;
             directionAction = direction -> BridgeDrill.fill(selectedTile, (Drill) Blocks.mechanicalDrill, direction);
@@ -184,6 +198,7 @@ public class AutoDrill extends Mod {
         mechanicalDrillButton.resizeImage(buttonSize);
 
         pneumaticDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-pneumatic-drill-full")), Styles.defaulti, () -> {
+            enabled = false;
             selectTable.visible = false;
             directionTable.visible = true;
             directionAction = direction -> BridgeDrill.fill(selectedTile, (Drill) Blocks.pneumaticDrill, direction);
@@ -191,18 +206,21 @@ public class AutoDrill extends Mod {
         pneumaticDrillButton.resizeImage(buttonSize);
 
         laserDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-laser-drill-full")), Styles.defaulti, () -> {
+            enabled = false;
             selectTable.visible = false;
             OptimizationDrill.fill(selectedTile, (Drill) Blocks.laserDrill);
         }).get();
         laserDrillButton.resizeImage(buttonSize);
 
         blastDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-blast-drill-full")), Styles.defaulti, () -> {
+            enabled = false;
             selectTable.visible = false;
             OptimizationDrill.fill(selectedTile, (Drill) Blocks.blastDrill);
         }).get();
         blastDrillButton.resizeImage(buttonSize);
 
         plasmaBoreButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-plasma-bore-full")), Styles.defaulti, () -> {
+            enabled = false;
             selectTable.visible = false;
             directionTable.visible = true;
             directionAction = direction -> WallDrill.fill(selectedTile, (BeamDrill) Blocks.plasmaBore, direction);
@@ -217,12 +235,14 @@ public class AutoDrill extends Mod {
         largePlasmaBoreButton.resizeImage(buttonSize);*/
 
         impactDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-impact-drill-full")), Styles.defaulti, () -> {
+            enabled = false;
             selectTable.visible = false;
             OptimizationDrill.fill(selectedTile, (Drill) Blocks.impactDrill, false);
         }).get();
         impactDrillButton.resizeImage(buttonSize);
 
         eruptionDrillButton = selectTable.button(new TextureRegionDrawable(Core.atlas.find("block-eruption-drill-full")), Styles.defaulti, () -> {
+            enabled = false;
             selectTable.visible = false;
             OptimizationDrill.fill(selectedTile, (Drill) Blocks.eruptionDrill, false);
         }).get();
@@ -264,7 +284,7 @@ public class AutoDrill extends Mod {
         }
 
         selectTable.removeChild(plasmaBoreButton);
-        if (Blocks.plasmaBore.environmentBuildable() && selectedTile.wallDrop() != null && selectedTile.wallDrop().hardness <= ((BeamDrill)Blocks.plasmaBore).tier) {
+        if (Blocks.plasmaBore.environmentBuildable() && selectedTile.wallDrop() != null && selectedTile.wallDrop().hardness <= ((BeamDrill) Blocks.plasmaBore).tier) {
             selectTable.add(plasmaBoreButton);
         }
 
@@ -334,5 +354,32 @@ public class AutoDrill extends Mod {
         directionTable.pack();
         directionTable.act(0);
         Core.scene.root.addChildAt(0, directionTable);
+    }
+
+    private static class DescriptionSetting extends SettingsMenuDialog.SettingsTable.Setting {
+        String desc;
+
+        public DescriptionSetting(String desc) {
+            super(null);
+            this.desc = desc;
+        }
+
+        @Override
+        public void add(SettingsMenuDialog.SettingsTable table) {
+            table.labelWrap(this.desc).fillX().get().setWrap(true);
+            table.row();
+        }
+    }
+
+    private static class DividerSetting extends SettingsMenuDialog.SettingsTable.Setting {
+        public DividerSetting() {
+            super(null);
+        }
+
+        @Override
+        public void add(SettingsMenuDialog.SettingsTable table) {
+            table.image().growX().pad(10, 0, 10, 0).color(Pal.gray);
+            table.row();
+        }
     }
 }
