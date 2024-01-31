@@ -174,7 +174,7 @@ public class AutoDrill extends Mod {
             enableButton.resizeImage(buttonSize);
             enableButton.visible(() -> Core.settings.getBool(bundle.get("auto-drill.settings.display-toggle-button")));
 
-            t.margin(5f);
+            t.margin(15f);
             t.marginRight(140f + 15f);
             t.top().right();
         });
