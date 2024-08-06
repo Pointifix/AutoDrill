@@ -1,6 +1,6 @@
-name: Commit Testing
+name: Build Mod
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   buildJar:
@@ -10,13 +10,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set up PATH
       run: |
-        echo "${ANDROID_HOME}/build-tools/30.0.1" >> $GITHUB_PATH
+        echo "${ANDROID_HOME}/build-tools/34.0.0" >> $GITHUB_PATH
     - name: Set up JDK 17
       uses: actions/setup-java@v1
       with:
         java-version: 17
     - name: Build mod jar
-      run: ./gradlew deploy
+      run: |
+        chmod +x ./gradlew
+        ./gradlew deploy
     - name: Upload built jar file
       uses: actions/upload-artifact@v2
       with:
