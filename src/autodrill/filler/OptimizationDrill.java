@@ -37,7 +37,7 @@ public class OptimizationDrill {
             tilesItemAndCount.put(t, Util.countOre(t, drill));
         }
 
-        tiles.filter(t -> {
+        tiles.retainAll(t -> {
             ObjectIntMap.Entry<Item> itemAndCount = tilesItemAndCount.get(t);
             return itemAndCount != null && itemAndCount.key == floor.itemDrop && itemAndCount.value >= minOresPerDrill;
         }).sort(t -> {
