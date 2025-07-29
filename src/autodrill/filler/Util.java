@@ -1,6 +1,6 @@
 package autodrill.filler;
 
-import arc.Core;
+import arc.func.Boolf;
 import arc.math.geom.Point2;
 import arc.math.geom.Rect;
 import arc.struct.ObjectIntMap;
@@ -8,7 +8,6 @@ import arc.struct.Queue;
 import arc.struct.Seq;
 import mindustry.Vars;
 import mindustry.content.Blocks;
-import mindustry.gen.Call;
 import mindustry.type.Item;
 import mindustry.world.Block;
 import mindustry.world.Build;
@@ -16,7 +15,6 @@ import mindustry.world.Edges;
 import mindustry.world.Tile;
 import mindustry.world.blocks.production.Drill;
 
-import static arc.Core.bundle;
 import static mindustry.Vars.world;
 
 public class Util {
@@ -150,5 +148,11 @@ public class Util {
 
     protected static Point2 tileToPoint2(Tile tile) {
         return new Point2(tile.x, tile.y);
+    }
+
+    // Fixed: Deprecated methods removed by Anuke
+    // https://github.com/Anuken/Arc/commit/7d6e89dffda6b7560c5a81d825e676aa526c230d
+    protected static Seq<Tile> filterTiles(Seq<Tile> tiles, Boolf<Tile> predicate){
+        return tiles.removeAll(e -> !predicate.get(e));
     }
 }

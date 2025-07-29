@@ -26,18 +26,14 @@ public enum Direction {
 
     public static Direction getOpposite(Direction direction) {
         switch (direction) {
-            case RIGHT -> {
+            case RIGHT:
                 return LEFT;
-            }
-            case UP -> {
+            case UP:
                 return DOWN;
-            }
-            case LEFT -> {
+            case LEFT:
                 return RIGHT;
-            }
-            default -> {
+            default:
                 return UP;
-            }
         }
     }
 }
