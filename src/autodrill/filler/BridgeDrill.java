@@ -13,8 +13,6 @@ import mindustry.world.blocks.production.Drill;
 
 import java.util.InputMismatchException;
 
-import static arc.Core.bundle;
-
 public class BridgeDrill {
     public static void fill(Tile tile, Drill drill, Direction direction) {
         if (drill.size != 2) throw new InputMismatchException("Drill must have a size of 2");
@@ -29,12 +27,12 @@ public class BridgeDrill {
     private static void placeDrillsAndBridges(Tile source, Seq<Tile> tiles, Drill drill, Direction direction) {
         Point2 directionConfig = new Point2(direction.p.x * 3, direction.p.y * 3);
 
-        Seq<Tile> drillTiles = tiles.copy().filter(BridgeDrill::isDrillTile);
-        Seq<Tile> bridgeTiles = tiles.copy().filter(BridgeDrill::isBridgeTile);
+        Seq<Tile> drillTiles = Util.filterTiles(tiles.copy(), BridgeDrill::isDrillTile);
+        Seq<Tile> bridgeTiles = Util.filterTiles(tiles.copy(), BridgeDrill::isBridgeTile);
 
         int minOresPerDrill = Core.settings.getInt((drill == Blocks.blastDrill ? "airblast" : (drill == Blocks.laserDrill ? "laser" : (drill == Blocks.pneumaticDrill ? "pneumatic" : "mechanical"))) + "-drill-min-ores");
 
-        drillTiles.filter(t -> {
+        Util.filterTiles(drillTiles, t -> {
             ObjectIntMap.Entry<Item> itemAndCount = Util.countOre(t, drill);
 
             if (itemAndCount == null || itemAndCount.key != source.drop() || itemAndCount.value < minOresPerDrill) {
@@ -42,13 +40,13 @@ public class BridgeDrill {
             }
 
             Seq<Tile> neighbors = Util.getNearbyTiles(t.x, t.y, drill);
-            neighbors.filter(BridgeDrill::isBridgeTile);
+            Util.filterTiles(neighbors, BridgeDrill::isBridgeTile);
 
             for (Tile neighbor : neighbors) {
                 if (bridgeTiles.contains(neighbor)) return true;
             }
 
-            neighbors.filter(n -> {
+            Util.filterTiles(neighbors, n -> {
                 BuildPlan buildPlan = new BuildPlan(n.x, n.y, 0, Blocks.itemBridge);
                 return buildPlan.placeable(Vars.player.team());
             });
