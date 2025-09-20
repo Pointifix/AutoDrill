@@ -29,12 +29,12 @@ public class BridgeDrill {
     private static void placeDrillsAndBridges(Tile source, Seq<Tile> tiles, Drill drill, Direction direction) {
         Point2 directionConfig = new Point2(direction.p.x * 3, direction.p.y * 3);
 
-        Seq<Tile> drillTiles = tiles.copy().filter(BridgeDrill::isDrillTile);
-        Seq<Tile> bridgeTiles = tiles.copy().filter(BridgeDrill::isBridgeTile);
+        Seq<Tile> drillTiles = tiles.select(BridgeDrill::isDrillTile);
+        Seq<Tile> bridgeTiles = tiles.select(BridgeDrill::isBridgeTile);
 
         int minOresPerDrill = Core.settings.getInt((drill == Blocks.blastDrill ? "airblast" : (drill == Blocks.laserDrill ? "laser" : (drill == Blocks.pneumaticDrill ? "pneumatic" : "mechanical"))) + "-drill-min-ores");
 
-        drillTiles.filter(t -> {
+        drillTiles.retainAll(t -> {
             ObjectIntMap.Entry<Item> itemAndCount = Util.countOre(t, drill);
 
             if (itemAndCount == null || itemAndCount.key != source.drop() || itemAndCount.value < minOresPerDrill) {
@@ -42,13 +42,13 @@ public class BridgeDrill {
             }
 
             Seq<Tile> neighbors = Util.getNearbyTiles(t.x, t.y, drill);
-            neighbors.filter(BridgeDrill::isBridgeTile);
+            neighbors.retainAll(BridgeDrill::isBridgeTile);
 
             for (Tile neighbor : neighbors) {
                 if (bridgeTiles.contains(neighbor)) return true;
             }
 
-            neighbors.filter(n -> {
+            neighbors.retainAll(n -> {
                 BuildPlan buildPlan = new BuildPlan(n.x, n.y, 0, Blocks.itemBridge);
                 return buildPlan.placeable(Vars.player.team());
             });

@@ -69,7 +69,7 @@ public class WallDrill {
         }
         if (ductTiles.isEmpty()) return;
 
-        Tile outerMostDuctTile = ductTiles.copy().filter(t -> boreTiles.find(bt -> direction.secondaryAxis(new Point2(bt.x, bt.y)) == direction.secondaryAxis(new Point2(t.x, t.y))) == null).max(t -> -direction.primaryAxis(new Point2(t.x, t.y)));
+        Tile outerMostDuctTile = ductTiles.select(t -> boreTiles.find(bt -> direction.secondaryAxis(new Point2(bt.x, bt.y)) == direction.secondaryAxis(new Point2(t.x, t.y))) == null).max(t -> -direction.primaryAxis(new Point2(t.x, t.y)));
         if (outerMostDuctTile == null) return;
         ductTiles.sort(t -> t.dst2(outerMostDuctTile));
         Seq<Tile> connectingTiles = new Seq<>();
@@ -203,7 +203,7 @@ public class WallDrill {
         }
 
         Seq<Tile> tilesCopy = tiles.copy();
-        tiles.filter(t1 -> {
+        tiles.retainAll(t1 -> {
             Point2 pT1 = Util.tileToPoint2(t1);
             int paT1 = direction.primaryAxis(pT1);
             int saT1 = direction.secondaryAxis(pT1);
