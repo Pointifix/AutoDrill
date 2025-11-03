@@ -25,8 +25,9 @@ public class WallDrill {
         Seq<Integer> occupiedSecondaryAxis = new Seq<>();
 
         Direction directionOpposite = Direction.getOpposite(direction);
-        Point2 offset = getDirectionOffset(direction, drill);
-        Point2 offsetOpposite = getDirectionOffset(directionOpposite, drill);
+        // Use separate offset functions to avoid circular dependency between opposite directions
+        Point2 offset = getDirectionOffsetForDrill(direction, drill);
+        Point2 offsetOpposite = getDirectionOffsetForDuct(directionOpposite, drill);
         for (Tile tile1 : tiles) {
             for (int i = 0; i < drill.range; i++) {
                 Tile boreTile = tile1.nearby((i + 1) * -direction.p.x + offset.x, (i + 1) * -direction.p.y + offset.y);
@@ -176,7 +177,10 @@ public class WallDrill {
 
         Item sourceItem = tile.wallDrop();
 
-        int maxTiles = (int) (Core.settings.getInt(bundle.get("auto-drill.settings.max-tiles")) * 0.25f);
+        // Use mechanical drill settings as base, with 0.25x multiplier for wall tiles
+        // Default to 200 if setting not found
+        int baseSetting = Core.settings.getInt("mechanical-drill-max-tiles", 200);
+        int maxTiles = (int) (baseSetting * 0.25f);
 
         while (!queue.isEmpty() && tiles.size < maxTiles) {
             Tile currentTile = queue.removeFirst();
@@ -220,7 +224,31 @@ public class WallDrill {
         return tiles;
     }
 
-    private static Point2 getDirectionOffset(Direction direction, Block block) {
+    // Calculate offset for drill placement
+    // Separate from duct offset to avoid circular dependency between opposite directions
+    private static Point2 getDirectionOffsetForDrill(Direction direction, Block block) {
+        int offset1 = (block.size - 1) / 2;
+        int offset2 = block.size / 2;
+
+        switch (direction) {
+            case RIGHT -> {
+                return new Point2(-offset2, 0);
+            }
+            case UP -> {
+                return new Point2(0, -offset2);
+            }
+            case LEFT -> {
+                return new Point2(-offset2, -1);
+            }
+            default -> { // DOWN
+                return new Point2(-offset2, 0);
+            }
+        }
+    }
+
+    // Calculate offset for duct placement
+    // Independent from drill offset to prevent placement conflicts
+    private static Point2 getDirectionOffsetForDuct(Direction direction, Block block) {
         int offset1 = (block.size - 1) / 2;
         int offset2 = block.size / 2;
 
@@ -234,8 +262,8 @@ public class WallDrill {
             case LEFT -> {
                 return new Point2(offset1, 0);
             }
-            default -> {
-                return new Point2(0, offset1);
+            default -> { // DOWN
+                return new Point2(offset1, 0);
             }
         }
     }
