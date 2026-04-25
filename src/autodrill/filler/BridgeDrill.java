@@ -97,29 +97,135 @@ public class BridgeDrill {
             }
         }
 
-        // Validate bridge plans
+        // Collect the set of bridge positions we intend to place so we can
+        // check connectivity. A bridge is only worth placing if it connects
+        // to at least one other bridge — either another planned bridge tile
+        // or an existing itemBridge already built on the map.
+        Seq<BuildPlan> bridgePlans = new Seq<>();
+
+        // First pass: build candidate bridge plans with their configs
         for (Tile bridgeTile : bridgeTiles) {
-            Tile neighbor = bridgeTiles.find(
-                t -> Math.abs(t.x - bridgeTile.x) + Math.abs(t.y - bridgeTile.y) == 3);
+            // Find a partner among our planned bridge tiles at Manhattan distance 3
+            Tile plannedPartner = bridgeTiles.find(
+                t -> t != bridgeTile
+                    && Math.abs(t.x - bridgeTile.x) + Math.abs(t.y - bridgeTile.y) == 3);
 
-            Point2 config = new Point2();
-            if (bridgeTile != outlet && neighbor != null) {
-                config = new Point2(neighbor.x - bridgeTile.x, neighbor.y - bridgeTile.y);
-            }
+            // Also check for an existing itemBridge on the map at distance 3
+            // in each cardinal direction. This lets us connect to bridges the
+            // player (or a previous AutoDrill run) already built.
+            Tile existingPartner = findExistingBridgePartner(bridgeTile);
 
-            BuildPlan plan = new BuildPlan(bridgeTile.x, bridgeTile.y, 0, Blocks.itemBridge, config);
-            if (Util.canPlaceWithoutPlanCollision(plan, team, allPlans)) {
-                allPlans.add(plan);
+            // Determine config: prefer planned partner, fall back to existing
+            Tile partner = plannedPartner != null ? plannedPartner : existingPartner;
+
+            if (bridgeTile == outlet) {
+                // The outlet is the chain endpoint — it receives a connection
+                // from an interior bridge, so it doesn't need outgoing config.
+                // But it still must be reachable by at least one other bridge.
+                boolean hasIncoming = bridgeTiles.contains(
+                    t -> t != outlet
+                        && Math.abs(t.x - outlet.x) + Math.abs(t.y - outlet.y) == 3);
+                boolean hasExistingIncoming = findExistingBridgePartner(outlet) != null;
+
+                if (!hasIncoming && !hasExistingIncoming) {
+                    if (Util.DEBUG) {
+                        Log.info("[AutoDrill] BridgeDrill: skipping orphan outlet at ("
+                            + outlet.x + "," + outlet.y + ") — no bridge connects to it");
+                    }
+                    continue;
+                }
+
+                BuildPlan plan = new BuildPlan(bridgeTile.x, bridgeTile.y, 0, Blocks.itemBridge, new Point2());
+                if (Util.canPlaceWithoutPlanCollision(plan, team, allPlans)) {
+                    bridgePlans.add(plan);
+                }
+            } else if (partner != null) {
+                // Interior bridge with a valid connection target
+                Point2 config = new Point2(partner.x - bridgeTile.x, partner.y - bridgeTile.y);
+                BuildPlan plan = new BuildPlan(bridgeTile.x, bridgeTile.y, 0, Blocks.itemBridge, config);
+                if (Util.canPlaceWithoutPlanCollision(plan, team, allPlans)) {
+                    bridgePlans.add(plan);
+                }
             } else {
-                // If a bridge endpoint can't be placed, the chain is broken.
-                // Log it for debugging but continue — partial layouts are still
-                // useful when only a few bridges fail.
+                // No partner found — this bridge would be orphaned, skip it
                 if (Util.DEBUG) {
-                    Log.info("[AutoDrill] BridgeDrill: skipping invalid bridge at ("
-                        + bridgeTile.x + "," + bridgeTile.y + ")");
+                    Log.info("[AutoDrill] BridgeDrill: skipping orphan bridge at ("
+                        + bridgeTile.x + "," + bridgeTile.y + ") — no partner at distance 3");
                 }
             }
         }
+
+        // Second pass: remove any bridge plan whose config points to a
+        // partner that didn't survive validation (i.e. was rejected or is
+        // itself orphaned). Keep iterating until stable.
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (int i = bridgePlans.size - 1; i >= 0; i--) {
+                BuildPlan bp = bridgePlans.get(i);
+                Point2 cfg = (Point2) bp.config;
+
+                // Outlet bridges (zero config) just need at least one bridge
+                // pointing at them
+                if (cfg.x == 0 && cfg.y == 0) {
+                    boolean anyPointsHere = false;
+                    for (int j = 0; j < bridgePlans.size; j++) {
+                        if (j == i) continue;
+                        BuildPlan other = bridgePlans.get(j);
+                        Point2 oCfg = (Point2) other.config;
+                        if (other.x + oCfg.x == bp.x && other.y + oCfg.y == bp.y) {
+                            anyPointsHere = true;
+                            break;
+                        }
+                    }
+                    // Also check if an existing bridge on the map points here
+                    if (!anyPointsHere) {
+                        anyPointsHere = hasExistingBridgePointingAt(bp.x, bp.y);
+                    }
+                    if (!anyPointsHere) {
+                        bridgePlans.remove(i);
+                        changed = true;
+                        if (Util.DEBUG) {
+                            Log.info("[AutoDrill] BridgeDrill: pruned unreachable bridge at ("
+                                + bp.x + "," + bp.y + ")");
+                        }
+                    }
+                    continue;
+                }
+
+                // For bridges with outgoing config, check that the target
+                // is either a planned bridge or an existing bridge on the map
+                int targetX = bp.x + cfg.x;
+                int targetY = bp.y + cfg.y;
+
+                boolean targetExists = false;
+                for (int j = 0; j < bridgePlans.size; j++) {
+                    BuildPlan other = bridgePlans.get(j);
+                    if (other.x == targetX && other.y == targetY) {
+                        targetExists = true;
+                        break;
+                    }
+                }
+                if (!targetExists) {
+                    // Check for an existing bridge building at the target tile
+                    Tile targetTile = Vars.world.tile(targetX, targetY);
+                    if (targetTile != null && targetTile.build != null
+                        && targetTile.block() == Blocks.itemBridge) {
+                        targetExists = true;
+                    }
+                }
+                if (!targetExists) {
+                    bridgePlans.remove(i);
+                    changed = true;
+                    if (Util.DEBUG) {
+                        Log.info("[AutoDrill] BridgeDrill: pruned bridge at ("
+                            + bp.x + "," + bp.y + ") — target (" + targetX + "," + targetY + ") gone");
+                    }
+                }
+            }
+        }
+
+        allPlans.addAll(bridgePlans);
 
         // --- Commit phase ---
         Util.commitPlans(allPlans);
@@ -127,6 +233,43 @@ public class BridgeDrill {
         if (Util.DEBUG) {
             Log.info("[AutoDrill] BridgeDrill: committed " + allPlans.size + " plans");
         }
+    }
+
+    /**
+     * Look for an existing itemBridge building on the map at exactly
+     * Manhattan distance 3 from the given tile in any cardinal direction.
+     * Returns the tile of the first match, or null if none found.
+     */
+    private static Tile findExistingBridgePartner(Tile bridgeTile) {
+        int[][] offsets = {{3, 0}, {-3, 0}, {0, 3}, {0, -3}};
+        for (int[] off : offsets) {
+            Tile candidate = Vars.world.tile(bridgeTile.x + off[0], bridgeTile.y + off[1]);
+            if (candidate != null && candidate.build != null
+                && candidate.block() == Blocks.itemBridge) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check whether any existing itemBridge on the map has a config
+     * that points at the given tile coordinates (i.e. it's already
+     * linked to this position).
+     */
+    private static boolean hasExistingBridgePointingAt(int x, int y) {
+        int[][] offsets = {{3, 0}, {-3, 0}, {0, 3}, {0, -3}};
+        for (int[] off : offsets) {
+            Tile candidate = Vars.world.tile(x + off[0], y + off[1]);
+            if (candidate != null && candidate.build != null
+                && candidate.block() == Blocks.itemBridge) {
+                // An existing bridge exists at distance 3 — it could be
+                // pointing at us. We can't easily read its config here,
+                // but its presence is enough to justify our bridge.
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isDrillTile(Tile tile) {
