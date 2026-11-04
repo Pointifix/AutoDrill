@@ -6,6 +6,7 @@ import arc.struct.ObjectIntMap;
 import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.util.Log;
+import autodrill.AutoDrill;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.entities.units.BuildPlan;
@@ -14,8 +15,6 @@ import mindustry.type.Item;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.production.Drill;
-
-import static arc.Core.bundle;
 
 public class OptimizationDrill {
     public static void fill(Tile tile, Drill drill) {
@@ -65,7 +64,7 @@ public class OptimizationDrill {
         Seq<BuildPlan> allPlans = new Seq<>();
         Seq<Tile> selection = new Seq<>();
 
-        int maxTries = Core.settings.getInt(bundle.get("auto-drill.settings.optimization-quality")) * 1000;
+        int maxTries = Core.settings.getInt(AutoDrill.OPTIMIZATION_QUALITY) * 1000;
 
         recursiveMaxSearch(tiles, drill, team, tilesItemAndCount, selection, new Seq<>(), 0, new Seq<>(), maxTries, 0);
 
@@ -79,7 +78,7 @@ public class OptimizationDrill {
 
         // Optional water extractors and power nodes
         if (waterExtractorsAndPowerNodes
-            && Core.settings.getBool(bundle.get("auto-drill.settings.place-water-extractor-and-power-nodes"))) {
+            && Core.settings.getBool(AutoDrill.PLACE_WATER_EXTRACTOR_AND_POWER_NODES)) {
             placeWaterExtractorsAndPowerNodes(selection, drill, team, allPlans);
         }
 
