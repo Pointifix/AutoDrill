@@ -195,10 +195,8 @@ public class OptimizationDrill {
         if (drill == Blocks.pneumaticDrill)  return "pneumatic";
         if (drill == Blocks.laserDrill)      return "laser";
         if (drill == Blocks.blastDrill)      return "airblast";
-        // Impact and eruption drills share the airblast settings in the original
-        // mod since they don't have dedicated settings entries.
-        if (drill == Blocks.impactDrill)     return "airblast";
-        if (drill == Blocks.eruptionDrill)   return "airblast";
+        if (drill == Blocks.impactDrill)     return "impact";
+        if (drill == Blocks.eruptionDrill)   return "eruption";
         return "airblast"; // fallback
     }
 }

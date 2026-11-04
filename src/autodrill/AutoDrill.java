@@ -22,6 +22,7 @@ import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.game.EventType;
 import mindustry.gen.Icon;
+import mindustry.gen.Iconc;
 import mindustry.graphics.Pal;
 import mindustry.mod.Mod;
 import mindustry.ui.Styles;
@@ -116,6 +117,14 @@ public class AutoDrill extends Mod {
             settings.pref(new DescriptionSetting("\uF86D " + bundle.get("auto-drill.settings.airblast-drill")));
             settings.sliderPref("airblast-drill-max-tiles", 100, 25, 500, 25, value -> value + "").title = bundle.get("auto-drill.settings.max-tiles");
             settings.sliderPref("airblast-drill-min-ores", 9, 1, 16, 1, value -> value + "").title = bundle.get("auto-drill.settings.min-ores");
+
+            settings.pref(new DescriptionSetting(Iconc.blockImpactDrill + " " + bundle.get("auto-drill.settings.impact-drill")));
+            settings.sliderPref("impact-drill-max-tiles", 100, 25, 500, 25, value -> value + "").title = bundle.get("auto-drill.settings.max-tiles");
+            settings.sliderPref("impact-drill-min-ores", 9, 1, 16, 1, value -> value + "").title = bundle.get("auto-drill.settings.min-ores");
+
+            settings.pref(new DescriptionSetting(Iconc.blockEruptionDrill + " " + bundle.get("auto-drill.settings.eruption-drill")));
+            settings.sliderPref("eruption-drill-max-tiles", 100, 25, 500, 25, value -> value + "").title = bundle.get("auto-drill.settings.max-tiles");
+            settings.sliderPref("eruption-drill-min-ores", 13, 1, 25, 1, value -> value + "").title = bundle.get("auto-drill.settings.min-ores");
 
             settings.pref(new DividerSetting());
             settings.pref(new DescriptionSetting(bundle.get("auto-drill.settings.optimization-quality-desc")));
