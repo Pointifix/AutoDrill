@@ -40,6 +40,13 @@ import static mindustry.Vars.ui;
 public class AutoDrill extends Mod {
     private static final int buttonSize = 30;
 
+    // Stable settings keys. Older versions used the translated setting title as the key,
+    // which reset these settings whenever the game language changed.
+    public static final String ACTIVATION_KEY = "auto-drill-activation-key";
+    public static final String DISPLAY_TOGGLE_BUTTON = "auto-drill-display-toggle-button";
+    public static final String OPTIMIZATION_QUALITY = "auto-drill-optimization-quality";
+    public static final String PLACE_WATER_EXTRACTOR_AND_POWER_NODES = "auto-drill-place-water-extractor-and-power-nodes";
+
     private boolean enabled = false;
 
     private Tile selectedTile;
@@ -54,6 +61,8 @@ public class AutoDrill extends Mod {
 
     @Override
     public void init() {
+        migrateSettingsKeys();
+
         // Tutorial
         if (!Core.settings.getBool("auto-drill")) {
             BaseDialog baseDialog = new BaseDialog(bundle.get("auto-drill-welcome-title"));
@@ -92,11 +101,11 @@ public class AutoDrill extends Mod {
             SettingsMenuDialog.SettingsTable settings = new SettingsMenuDialog.SettingsTable();
 
             settings.pref(new DescriptionSetting(bundle.get("auto-drill.settings.activation-desc")));
-            settings.textPref(bundle.get("auto-drill.settings.activation-key"), KeyCode.h.name().toUpperCase(), s -> {
+            settings.textPref(ACTIVATION_KEY, KeyCode.h.name().toUpperCase(), s -> {
                 KeyCode keyCode = Arrays.stream(KeyCode.values()).filter(k -> k.value.equalsIgnoreCase(s)).findFirst().orElse(null);
-                Core.settings.put(bundle.get("auto-drill.settings.activation-key"), keyCode == null ? KeyCode.h.name().toUpperCase() : keyCode.name().toUpperCase());
+                Core.settings.put(ACTIVATION_KEY, keyCode == null ? KeyCode.h.name().toUpperCase() : keyCode.name().toUpperCase());
             });
-            settings.checkPref(bundle.get("auto-drill.settings.display-toggle-button"), true);
+            settings.checkPref(DISPLAY_TOGGLE_BUTTON, true);
             settings.pref(new DividerSetting());
 
             settings.pref(new DescriptionSetting(bundle.get("auto-drill.settings.drills-desc")));
@@ -119,8 +128,8 @@ public class AutoDrill extends Mod {
 
             settings.pref(new DividerSetting());
             settings.pref(new DescriptionSetting(bundle.get("auto-drill.settings.optimization-quality-desc")));
-            settings.sliderPref(bundle.get("auto-drill.settings.optimization-quality"), 2, 1, 10, 1, i -> i + "");
-            settings.checkPref(bundle.get("auto-drill.settings.place-water-extractor-and-power-nodes"), true);
+            settings.sliderPref(OPTIMIZATION_QUALITY, 2, 1, 10, 1, i -> i + "");
+            settings.checkPref(PLACE_WATER_EXTRACTOR_AND_POWER_NODES, true);
 
             settingsTable.add(settings);
         };
@@ -137,7 +146,7 @@ public class AutoDrill extends Mod {
                         !ui.consolefrag.shown() &&
                         !ui.content.isShown() &&
                         !Core.scene.hasKeyboard()) {
-                    if (Core.settings.getString(bundle.get("auto-drill.settings.activation-key")).equalsIgnoreCase(keyCode.value)) {
+                    if (Core.settings.getString(ACTIVATION_KEY).equalsIgnoreCase(keyCode.value)) {
                         enabled = !enabled;
                         selectTable.visible = false;
                         directionTable.visible = false;
@@ -172,12 +181,29 @@ public class AutoDrill extends Mod {
                 directionTable.visible = false;
             }).get();
             enableButton.resizeImage(buttonSize);
-            enableButton.visible(() -> Core.settings.getBool(bundle.get("auto-drill.settings.display-toggle-button")));
+            enableButton.visible(() -> Core.settings.getBool(DISPLAY_TOGGLE_BUTTON));
 
             t.margin(5f);
             t.marginRight(140f + 15f);
             t.top().right();
         });
+    }
+
+    /** Copies values saved under the old translated keys to the new stable keys, once. */
+    private static void migrateSettingsKeys() {
+        String[][] keys = {
+            {ACTIVATION_KEY, "auto-drill.settings.activation-key"},
+            {DISPLAY_TOGGLE_BUTTON, "auto-drill.settings.display-toggle-button"},
+            {OPTIMIZATION_QUALITY, "auto-drill.settings.optimization-quality"},
+            {PLACE_WATER_EXTRACTOR_AND_POWER_NODES, "auto-drill.settings.place-water-extractor-and-power-nodes"},
+        };
+        for (String[] key : keys) {
+            String oldKey = bundle.get(key[1]);
+            if (!Core.settings.has(key[0]) && Core.settings.has(oldKey)) {
+                Core.settings.put(key[0], Core.settings.get(oldKey, null));
+                Core.settings.remove(oldKey);
+            }
+        }
     }
 
     private void buildSelectTable() {
